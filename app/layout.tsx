@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ghostek Media – Zamówienie",
+  title: "Szpontlab – Zamówienie",
   description: "Skonfiguruj swój projekt: strona, branding, kampanie, aplikacje.",
 };
 

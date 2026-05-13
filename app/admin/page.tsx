@@ -12,7 +12,7 @@ export default function AdminPage() {
       <header className="mb-8 flex items-end justify-between gap-4">
         <div>
           <p className="font-mono text-xs uppercase tracking-widest text-emerald-500">
-            Admin
+            Szpontlab · Admin
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">
             Zamówienia ({orders.length})
