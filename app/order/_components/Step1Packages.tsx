@@ -11,10 +11,10 @@ export default function Step1Packages({ onChoose }: Props) {
     <div className="space-y-10">
       <header className="text-center">
         <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
-          Wybierz pakiet
+          Jak możemy Ci pomóc?
         </h1>
         <p className="mt-2 text-sm text-neutral-400">
-          Trzy gotowe ścieżki. Wybierz najbliższą i przechodzimy do briefu.
+          Wybierz zakres — cena i szczegóły są od razu widoczne.
         </p>
       </header>
 
@@ -29,7 +29,7 @@ export default function Step1Packages({ onChoose }: Props) {
               className={[
                 "relative flex flex-col rounded-2xl border p-6 text-left transition",
                 highlighted
-                  ? "border-emerald-500 bg-emerald-600/5 shadow-[0_0_0_1px_rgba(16,185,129,0.3)] hover:bg-emerald-600/10"
+                  ? "border-emerald-500 bg-emerald-600/5 shadow-xl shadow-emerald-900/40 hover:bg-emerald-600/10 md:scale-[1.02]"
                   : "border-neutral-800 bg-neutral-900/40 hover:border-neutral-700",
               ].join(" ")}
             >
@@ -79,24 +79,17 @@ export default function Step1Packages({ onChoose }: Props) {
         })}
       </div>
 
-      <aside className="rounded-xl border border-neutral-800 bg-neutral-900/40 p-5 md:flex md:items-center md:justify-between md:gap-6">
-        <div>
-          <h2 className="text-sm font-semibold text-neutral-100">
-            Potrzebujesz czegoś innego?
-          </h2>
-          <p className="mt-1 text-sm text-neutral-400">
-            Masz niestandardowy projekt — platformę, aplikację, branding od zera?
-          </p>
-        </div>
+      <p className="mt-2 text-center text-xs text-neutral-500">
+        Masz niestandardowy projekt?{" "}
         <a
           href="https://instagram.com/ghostekmedia"
           target="_blank"
           rel="noreferrer"
-          className="mt-3 inline-flex shrink-0 items-center justify-center rounded-md border border-neutral-700 px-4 py-2.5 text-sm text-neutral-200 transition hover:border-neutral-500 md:mt-0"
+          className="text-emerald-500 hover:underline"
         >
-          Porozmawiajmy na Instagramie →
+          Napisz na Instagramie →
         </a>
-      </aside>
+      </p>
     </div>
   );
 }

@@ -35,7 +35,7 @@ export const PACKAGES: Package[] = [
       "Podstawowe SEO",
     ],
     weeksLabel: "4 tygodnie",
-    badge: "Najpopularniejszy",
+    badge: "✦ Najczęściej wybierany",
   },
   {
     id: "brand",

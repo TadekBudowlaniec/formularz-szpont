@@ -1,89 +1,166 @@
-Edytuj istniejący projekt Next.js (sales funnel agencji webowej). Poniżej lista zmian do wprowadzenia. Nie przepisuj projektu od zera — modyfikuj istniejące pliki.
+Edytuj istniejący projekt Next.js pod maksymalną konwersję.
+Nie przepisuj od zera — tylko celowane zmiany w istniejących plikach.
+Każda zmiana ma uzasadnienie w psychologii sprzedaży lub UX research.
 
 ---
 
-## 1. ZASTĄP KONFIGURATOR TRZEMA PAKIETAMI
+## STEP 1 — Step1Packages.tsx
 
-Usuń Step1Services.tsx (konfigurator z checkboxami). Zastąp go nową stroną z 3 pakietami.
+### 1a. Usuń "leak" z podtytułu
+Obecny podtytuł "Trzy gotowe ścieżki. Wybierz najbliższą i przechodzimy do briefu."
+informuje użytkownika że czekają go kolejne kroki = podnosi poczucie wysiłku zanim zacznie.
 
-Plik: app/order/_components/Step1Packages.tsx
+Zmień na:
+h1: "Jak możemy Ci pomóc?"
+p: "Wybierz zakres — cena i szczegóły są od razu widoczne."
 
-Pakiety:
+### 1b. Chroń wybór środkowej karty (efekt kompromisu)
+Karta GROWTH musi wizualnie dominować. Dodaj do niej:
+- scale-[1.02] na md breakpoincie
+- Cień: shadow-emerald-900/40 shadow-xl
+- Badge zmień na: "✦ Najczęściej wybierany"
 
-STARTER — 4 500 zł netto
-- Landing page (Next.js, 1 strona)
-- Projekt w Figma
-- Wdrożenie na Vercel
-- CMS (Sanity) do edycji treści
-- Czas realizacji: 2 tygodnie
-id: "starter"
-
-GROWTH — 9 500 zł netto  
-- Strona firmowa do 8 podstron
-- Projekt w Figma
-- Wdrożenie na Vercel
-- CMS (Sanity)
-- Integracja formularza kontaktowego
-- Podstawowe SEO
-- Czas realizacji: 4 tygodnie
-id: "growth"
-badge: "Najpopularniejszy"
-
-BRAND — 18 000 zł netto
-- Pełna identyfikacja wizualna (logo, brand book)
-- Strona firmowa bez limitu podstron
-- Projekt w Figma
-- Wdrożenie na Vercel
-- CMS (Sanity)
-- Kampania Meta Ads (setup)
-- Czas realizacji: 6–8 tygodni
-id: "brand"
-
-UI pakietów:
-- Trzy karty w rzędzie (na mobile stack pionowo)
-- Środkowa karta (GROWTH) wyróżniona: border-emerald-500, badge "Najpopularniejszy" w prawym górnym rogu
-- Każda karta: nazwa, cena duża, lista features z checkmark icons, czas realizacji, przycisk "Wybieram →"
-- Kliknięcie karty od razu przechodzi do kroku 2 (bez osobnego "Dalej")
-- Pod kartami osobna sekcja "Potrzebujesz czegoś innego?":
-  tekst: "Masz niestandardowy projekt — platformę, aplikację, branding od zera?"
-  przycisk: "Porozmawiajmy na Instagramie →" (link: https://instagram.com/ghostekmedia, target _blank)
-  styl: subtelny, border-neutral-800, nie konkuruje z kartami
+### 1c. Zmniejsz widoczność sekcji "Potrzebujesz czegoś innego?"
+Hick's Law: każdy dodatkowy element to dodatkowa decyzja.
+Ta sekcja powinna być obecna ale nie konkurować z kartami.
+Zmień na jedną linię tekstu bez ramki:
+<p class="text-center text-xs text-neutral-500 mt-2">
+  Masz niestandardowy projekt?{" "}
+  <a href="https://instagram.com/ghostekmedia" class="text-emerald-500 hover:underline" target="_blank">
+    Napisz na Instagramie →
+  </a>
+</p>
 
 ---
 
-## 2. UPROŚĆ FORMULARZ (KROK 2)
+## STEP 2 — Step2Brief.tsx
 
-Edytuj Step2Brief.tsx. Zostaw tylko 3 pola:
+### 2a. Napraw kłamstwo w subtitle
+"Dwa pola i możemy zaczynać." — są trzy pola, nie dwa. Użytkownik to widzi i traci zaufanie.
+Zmień p na: "Chwila i możemy zaczynać."
 
-1. Imię i nazwisko (required)
-2. Email (required)  
-3. "Opisz projekt w jednym zdaniu" — textarea, max 300 znaków, placeholder: "np. Potrzebuję landing page dla gabinetu stomatologicznego w Krakowie"
+### 2b. Auto-focus na pierwsze pole przy wejściu w krok
+Dodaj autoFocus do inputu "Imię i nazwisko".
+Dlaczego: użytkownik nie musi klikać — kursor jest od razu tam gdzie trzeba.
+Każda sekunda tarcia to potencjalne porzucenie.
 
-Usuń pola: telefon, startDate, hasMaterials, source.
+### 2c. Dodaj autocomplete attributes
+input imię i nazwisko: autocomplete="name"
+input email: autocomplete="email"
+Dlaczego: przeglądarka wypełnia automatycznie = o 30-40% szybsze wypełnienie formularza (Baymard Institute).
 
-Nagłówek zmień na:
-h1: "Ostatni krok"
-p: "Dwa pola i możemy zaczynać."
+### 2d. Zmień label "Opisz projekt w jednym zdaniu"
+"W jednym zdaniu" + limit 300 znaków to sprzeczne komunikaty.
+Zmień label na: "Opisz krótko czego potrzebujesz"
+Zmień placeholder na: "np. Landing page dla gabinetu stomatologicznego, mam już logo i teksty"
 
-Schema w lib/schemas.ts zaktualizuj odpowiednio (usuń nieużywane pola z briefSchema).
+### 2e. Zdegraduj przycisk "← Wstecz" wizualnie
+Obecny "Wstecz" to pełny button z borderem — wygląda jak równorzędna opcja z "Przejdź do płatności".
+Hick's Law: dwa równorzędne CTA = paraliza decyzyjna.
+Zmień na czysty link bez tła i obramowania:
+<button type="button" onClick={onBack}
+  className="text-xs text-neutral-500 hover:text-neutral-300 transition px-2 py-1">
+  ← Wróć
+</button>
 
-Przycisk submit zmień na: "Przejdź do płatności →"
+### 2f. Zmień tekst submit buttona
+"Przejdź do płatności →" brzmi jak kolejny krok w nieskończoność.
+Zmień na: "Sprawdź podsumowanie →"
+Dlaczego: podsumowanie = koniec procesu w głowie użytkownika. Mniej lęku.
 
 ---
 
-## 3. STRIPE W KROKU 3
+## STEP 3 — Step3Summary.tsx
 
-Edytuj Step3Summary.tsx i API.
+### 3a. Pre-select opcję "Zaliczka 30%" przy wejściu w krok
+Zmień: const [paymentType, setPaymentType] = useState<PaymentType | null>(null);
+Na:   const [paymentType, setPaymentType] = useState<PaymentType>("deposit");
 
-Przycisk "Złóż zamówienie" zastąp prawdziwą płatnością Stripe.
+Dlaczego: commitment & consistency (Cialdini). Użytkownik nie musi wybierać od zera —
+jest już "w środku" decyzji. Przycisk płatności jest aktywny od razu.
+Kto chce pełną płatność, aktywnie ją wybiera (i widzi nagrodę: -5%).
 
-Flow:
-1. User wybiera opcję płatności (zaliczka 30% lub pełna -5%)
-2. Klika "Zapłać [kwota] zł →"
-3. POST /api/orders — zapis do Supabase (patrz punkt 4)
-4. POST /api/create-checkout — tworzy Stripe Checkout Session
-5. Redirect na Stripe
+### 3b. Zmień badge na karcie "Pełna płatność"
+Z "Najlepsza cena" na "Oszczędzasz ${formatPLN(fullSavings)}"
+Dlaczego: konkretna kwota boli bardziej niż abstrakcyjny tag. Loss aversion.
 
-Plik: app/api/create-checkout/route.ts
+### 3c. Dodaj trust signal pod przyciskiem płatności
+Bezpośrednio pod buttonem "Zapłać X zł →" dodaj:
+<p className="mt-2 flex items-center justify-center gap-1.5 text-xs text-neutral-500">
+  <span>🔒</span>
+  <span>Bezpieczna płatność · Stripe · SSL</span>
+</p>
+Dlaczego: anxiety reducer tuż przed kliknięciem płatności = mniejszy drop-off w ostatniej chwili (Baymard).
 
-```typescript
+### 3d. Zdegraduj przycisk "← Wstecz" tak samo jak w Step 2
+Ten sam zabieg — tekst link zamiast pełnego buttona.
+
+### 3e. Zmień CTA w stanie "submitting"
+Z "Wysyłanie..." na "Przygotowuję zamówienie..."
+Dlaczego: "Wysyłanie" brzmi technicznie i zimno. "Przygotowuję" brzmi jak działanie po Twojej stronie.
+
+### 3f. Usuń link do Instagrama z dołu Step 3
+"Masz pytania? Napisz do mnie na Instagramie @ghostekmedia" — to jest wyjście awaryjne tuż przed płatnością.
+Podajesz użytkownikowi powód żeby uciec w ostatniej chwili.
+Usuń ten element całkowicie z Step 3. Fallback IG jest na success page — to wystarczy.
+
+---
+
+## STEP 4 — Success page (app/order/success/page.tsx)
+
+Przepisz całkowicie. Obecna wersja ma dwa przyciski (IG + strona główna) co tworzy decyzję w momencie gdy
+użytkownik powinien czuć tylko spokój i potwierdzenie.
+
+Nowa wersja — TYLKO to:
+
+<main className="mx-auto max-w-lg px-6 py-24 text-center">
+  <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-600/20 text-3xl text-emerald-400">
+    ✓
+  </div>
+  <h1 className="text-3xl font-semibold tracking-tight">
+    Płatność przyjęta. Działamy.
+  </h1>
+  <p className="mt-4 text-neutral-400 leading-relaxed">
+    Odezwę się do Ciebie na Instagramie w ciągu 24 godzin
+    z potwierdzeniem i pierwszymi krokami.
+  </p>
+  {order && (
+    <p className="mt-8 font-mono text-xs text-neutral-600">
+      #{order.id.slice(0, 8)}
+    </p>
+  )}
+</main>
+
+Zero przycisków. Zero linków. Użytkownik nie ma gdzie uciec — i nie potrzebuje.
+Spokój po zakupie = mniejszy buyer's remorse = mniej chargebacków.
+
+---
+
+## STEP 5 — ScarcityBar.tsx
+
+Dodaj pulsujący zielony dot przed tekstem żeby wyglądał jak live status:
+
+<div className="border-b border-emerald-900/40 bg-emerald-600/10">
+  <div className="mx-auto max-w-6xl px-4 py-2 text-center text-xs font-medium text-emerald-300 md:px-6 flex items-center justify-center gap-2">
+    <span className="relative flex h-2 w-2">
+      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+    </span>
+    {text}
+  </div>
+</div>
+
+Dlaczego: pulsujący dot sygnalizuje live data. Użytkownik podświadomie traktuje
+"2 miejsca" jako aktualny stan, nie hardkodowany string.
+
+---
+
+## CZEGO NIE RUSZAJ
+
+- ProgressBar.tsx — bez zmian
+- Sidebar.tsx — bez zmian  
+- OrderFunnel.tsx — bez zmian
+- globals.css — bez zmian
+- layout.tsx — bez zmian
+- Cały stack API (orders/route.ts) — bez zmian
+- Paleta kolorów, czcionki, dark theme — bez zmian

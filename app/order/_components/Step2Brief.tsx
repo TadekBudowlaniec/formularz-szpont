@@ -38,7 +38,7 @@ export default function Step2Brief({ defaultValues, onBack, onSubmit }: Props) {
           Ostatni krok
         </h1>
         <p className="mt-2 text-sm text-neutral-400">
-          Dwa pola i możemy zaczynać.
+          Chwila i możemy zaczynać.
         </p>
       </header>
 
@@ -46,6 +46,8 @@ export default function Step2Brief({ defaultValues, onBack, onSubmit }: Props) {
         <input
           type="text"
           placeholder="Jan Kowalski"
+          autoComplete="name"
+          autoFocus
           className={errors.name ? inputErr : inputOk}
           {...register("name")}
         />
@@ -55,20 +57,21 @@ export default function Step2Brief({ defaultValues, onBack, onSubmit }: Props) {
         <input
           type="email"
           placeholder="jan@firma.pl"
+          autoComplete="email"
           className={errors.email ? inputErr : inputOk}
           {...register("email")}
         />
       </Field>
 
       <Field
-        label="Opisz projekt w jednym zdaniu"
+        label="Opisz krótko czego potrzebujesz"
         error={errors.description?.message}
         hint={`${descLength}/${DESCRIPTION_MAX}`}
       >
         <textarea
           rows={3}
           maxLength={DESCRIPTION_MAX}
-          placeholder="np. Potrzebuję landing page dla gabinetu stomatologicznego w Krakowie"
+          placeholder="np. Landing page dla gabinetu stomatologicznego, mam już logo i teksty"
           className={(errors.description ? inputErr : inputOk) + " resize-y"}
           {...register("description")}
         />
@@ -78,16 +81,16 @@ export default function Step2Brief({ defaultValues, onBack, onSubmit }: Props) {
         <button
           type="button"
           onClick={onBack}
-          className="rounded-md border border-neutral-700 px-4 py-2.5 text-sm text-neutral-200 transition hover:border-neutral-500"
+          className="px-2 py-1 text-xs text-neutral-500 transition hover:text-neutral-300"
         >
-          ← Wstecz
+          ← Wróć
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
           className="rounded-md bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
         >
-          Przejdź do płatności →
+          Sprawdź podsumowanie →
         </button>
       </div>
     </form>
