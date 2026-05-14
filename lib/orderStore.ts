@@ -1,4 +1,4 @@
-import { calcTotals } from "./services";
+import { calcAmountDue, getPackage } from "./packages";
 import type { OrderInput } from "./schemas";
 
 export type Order = {
@@ -6,15 +6,11 @@ export type Order = {
   createdAt: string;
   name: string;
   email: string;
-  phone?: string;
   description: string;
-  startDate: string;
-  hasMaterials: string;
-  source: string;
-  services: string[];
+  packageId: "starter" | "growth" | "brand";
+  packageName: string;
+  price: number;
   paymentType: "deposit" | "full";
-  oneTime: number;
-  monthly: number;
   amountDue: number;
 };
 
@@ -33,26 +29,22 @@ function makeId(): string {
 }
 
 export function createOrder(input: OrderInput): Order {
-  const totals = calcTotals(input.services);
-  const amountDue =
-    input.paymentType === "full"
-      ? Math.round(totals.oneTime * 0.95)
-      : Math.round(totals.oneTime * 0.3);
+  const pkg = getPackage(input.packageId);
+  if (!pkg) {
+    throw new Error(`Nieznany pakiet: ${input.packageId}`);
+  }
+  const amountDue = calcAmountDue(pkg.price, input.paymentType);
 
   const order: Order = {
     id: makeId(),
     createdAt: new Date().toISOString(),
     name: input.name,
     email: input.email,
-    phone: input.phone || undefined,
     description: input.description,
-    startDate: input.startDate,
-    hasMaterials: input.hasMaterials,
-    source: input.source,
-    services: input.services,
+    packageId: pkg.id,
+    packageName: pkg.name,
+    price: pkg.price,
     paymentType: input.paymentType,
-    oneTime: totals.oneTime,
-    monthly: totals.monthly,
     amountDue,
   };
 

@@ -1,79 +1,89 @@
-Zbuduj sales funnel w Next.js 15 (App Router) jako osobna strona /order.
+Edytuj istniejący projekt Next.js (sales funnel agencji webowej). Poniżej lista zmian do wprowadzenia. Nie przepisuj projektu od zera — modyfikuj istniejące pliki.
 
-TECH STACK: Next.js 15, TypeScript, Tailwind CSS, Stripe (Checkout Sessions), Supabase (zapis zamówień), react-hook-form + zod, Vercel deployment.
+---
 
-FLOW - 3 kroki w jednym URL z lokalnym state (no routing między krokami):
+## 1. ZASTĄP KONFIGURATOR TRZEMA PAKIETAMI
 
---- KROK 1: KONFIGURATOR ---
-Lewa kolumna (md:w-2/3): lista usług jako checkboxy.
-Prawa kolumna sticky (md:w-1/3): live podsumowanie z ceną.
+Usuń Step1Services.tsx (konfigurator z checkboxami). Zastąp go nową stroną z 3 pakietami.
 
-Usługi podzielone na kategorie:
+Plik: app/order/_components/Step1Packages.tsx
 
-STRONY INTERNETOWE:
-- Landing page – 4500 zł
-- Strona firmowa (do 10 podstron) – 8500 zł
-- Sklep internetowy – 12000 zł
+Pakiety:
 
-BRANDING:
-- Logo + identyfikacja wizualna – 3500 zł
-- Brand book (guidelines) – 2000 zł
+STARTER — 4 500 zł netto
+- Landing page (Next.js, 1 strona)
+- Projekt w Figma
+- Wdrożenie na Vercel
+- CMS (Sanity) do edycji treści
+- Czas realizacji: 2 tygodnie
+id: "starter"
 
-KAMPANIE:
-- Setup kampanii Meta Ads – 2500 zł
-- Setup kampanii Google Ads – 2500 zł
-- Zarządzanie kampanią / mies. – 1500 zł (recurring - oznacz inaczej)
+GROWTH — 9 500 zł netto  
+- Strona firmowa do 8 podstron
+- Projekt w Figma
+- Wdrożenie na Vercel
+- CMS (Sanity)
+- Integracja formularza kontaktowego
+- Podstawowe SEO
+- Czas realizacji: 4 tygodnie
+id: "growth"
+badge: "Najpopularniejszy"
 
-PLATFORMY I APLIKACJE:
-- Web app / platforma – 15000 zł
-- Aplikacja mobilna (React Native) – 25000 zł
+BRAND — 18 000 zł netto
+- Pełna identyfikacja wizualna (logo, brand book)
+- Strona firmowa bez limitu podstron
+- Projekt w Figma
+- Wdrożenie na Vercel
+- CMS (Sanity)
+- Kampania Meta Ads (setup)
+- Czas realizacji: 6–8 tygodni
+id: "brand"
 
-DODATKI:
-- Copywriting (cała strona) – 1200 zł
-- SEO podstawowe – 1500 zł
-- Animacje i motion – 2000 zł
-- CMS + szkolenie – 800 zł
-- Opieka techniczna / mies. – 400 zł (recurring)
+UI pakietów:
+- Trzy karty w rzędzie (na mobile stack pionowo)
+- Środkowa karta (GROWTH) wyróżniona: border-emerald-500, badge "Najpopularniejszy" w prawym górnym rogu
+- Każda karta: nazwa, cena duża, lista features z checkmark icons, czas realizacji, przycisk "Wybieram →"
+- Kliknięcie karty od razu przechodzi do kroku 2 (bez osobnego "Dalej")
+- Pod kartami osobna sekcja "Potrzebujesz czegoś innego?":
+  tekst: "Masz niestandardowy projekt — platformę, aplikację, branding od zera?"
+  przycisk: "Porozmawiajmy na Instagramie →" (link: https://instagram.com/ghostekmedia, target _blank)
+  styl: subtelny, border-neutral-800, nie konkuruje z kartami
 
-W sticky sidebar: lista zaznaczonych pozycji, suma, szacowany czas realizacji (obliczany: każda usługa ma przypisany `days`, sumuj i pokaż jako "ok. X tygodni"), przycisk "Dalej →" disabled jeśli nic nie zaznaczone.
+---
 
---- KROK 2: BRIEF ---
-Pola z react-hook-form + zod:
-- Imię i nazwisko (required)
-- Email (required, email validation)
-- Numer telefonu (optional)
-- Opisz projekt w kilku zdaniach - textarea (required, min 30 znaków)
-- Kiedy chcesz zacząć? - select: "Jak najszybciej" / "Za 2-4 tygodnie" / "Za 1-2 miesiące" / "Elastycznie"
-- Czy masz już materiały? (logo, teksty, zdjęcia) - select: "Tak, mam wszystko" / "Częściowo" / "Nie, potrzebuję pomocy"
-- Skąd trafiłeś? - prefillowane "Instagram" ale edytowalne
+## 2. UPROŚĆ FORMULARZ (KROK 2)
 
---- KROK 3: PODSUMOWANIE + PŁATNOŚĆ ---
-Podsumowanie zamówienia (lista usług + ceny).
+Edytuj Step2Brief.tsx. Zostaw tylko 3 pola:
 
-Dwie opcje płatności jako karty do wyboru:
-A) Zaliczka 30% - "Rezerwujesz termin, resztę płacisz po akceptacji projektu"
-B) Pełna płatność - "-5% rabatu, oszczędzasz X zł"
+1. Imię i nazwisko (required)
+2. Email (required)  
+3. "Opisz projekt w jednym zdaniu" — textarea, max 300 znaków, placeholder: "np. Potrzebuję landing page dla gabinetu stomatologicznego w Krakowie"
 
-Po wyborze opcji → przycisk "Zapłać przez Stripe".
+Usuń pola: telefon, startDate, hasMaterials, source.
 
-Po kliknięciu:
-1. POST /api/create-order: zapisz zamówienie do Supabase (tabela orders: id, created_at, customer_name, customer_email, customer_phone, services JSONB, total_price, payment_type, brief_text, start_date, has_materials, source)
-2. POST /api/create-checkout: utwórz Stripe Checkout Session z line_items (nazwa: "Ghostek Media - [lista usług skrócona]", amount: obliczona kwota), success_url: /order/success, cancel_url: /order
-3. Redirect na Stripe Checkout
+Nagłówek zmień na:
+h1: "Ostatni krok"
+p: "Dwa pola i możemy zaczynać."
 
-Strona /order/success: podziękowanie + "Odezwiemy się w ciągu 24h" + link do IG.
+Schema w lib/schemas.ts zaktualizuj odpowiednio (usuń nieużywane pola z briefSchema).
 
-Pod opcjami płatności mały fallback: "Masz pytania? Napisz do mnie na Instagramie @ghostekmedia" (link do profilu).
+Przycisk submit zmień na: "Przejdź do płatności →"
 
-DESIGN: ciemna paleta, profesjonalna. Akcent: emerald-600 (#059669). Czcionka: Geist (next/font). Brak zbędnych animacji - czysty, szybki interfejs. Mobile-first. Progress bar na górze (3 kroki).
+---
 
-ZMIENNE ŚRODOWISKOWE (stwórz .env.local.example):
-STRIPE_SECRET_KEY
-STRIPE_PUBLISHABLE_KEY  
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-SUPABASE_URL
-SUPABASE_ANON_KEY
+## 3. STRIPE W KROKU 3
 
-SUPABASE: stwórz plik supabase/schema.sql z CREATE TABLE orders.
+Edytuj Step3Summary.tsx i API.
 
-Scarcity element: pod headerem strony mały pasek "Wolne terminy w czerwcu: 2 miejsca" - hardkodowany string, żebym mógł go edytować ręcznie w kodzie.
+Przycisk "Złóż zamówienie" zastąp prawdziwą płatnością Stripe.
+
+Flow:
+1. User wybiera opcję płatności (zaliczka 30% lub pełna -5%)
+2. Klika "Zapłać [kwota] zł →"
+3. POST /api/orders — zapis do Supabase (patrz punkt 4)
+4. POST /api/create-checkout — tworzy Stripe Checkout Session
+5. Redirect na Stripe
+
+Plik: app/api/create-checkout/route.ts
+
+```typescript

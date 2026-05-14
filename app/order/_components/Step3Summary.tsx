@@ -2,33 +2,30 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  calcTotals,
-  formatPLN,
-  getServicesByIds,
-} from "@/lib/services";
+import { calcAmountDue, formatPLN, getPackage, type PackageId } from "@/lib/packages";
 import type { BriefData } from "@/lib/schemas";
 
 type Props = {
-  selectedIds: string[];
+  packageId: PackageId;
   brief: BriefData;
   onBack: () => void;
 };
 
 type PaymentType = "deposit" | "full";
 
-export default function Step3Summary({ selectedIds, brief, onBack }: Props) {
+export default function Step3Summary({ packageId, brief, onBack }: Props) {
   const router = useRouter();
   const [paymentType, setPaymentType] = useState<PaymentType | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const items = getServicesByIds(selectedIds);
-  const totals = calcTotals(selectedIds);
+  const pkg = getPackage(packageId);
+  if (!pkg) return null;
 
-  const fullPrice = Math.round(totals.oneTime * 0.95);
-  const fullSavings = totals.oneTime - fullPrice;
-  const depositPrice = Math.round(totals.oneTime * 0.3);
+  const fullPrice = calcAmountDue(pkg.price, "full");
+  const fullSavings = pkg.price - fullPrice;
+  const depositPrice = calcAmountDue(pkg.price, "deposit");
+  const amountDue = paymentType ? calcAmountDue(pkg.price, paymentType) : 0;
 
   async function submit() {
     if (!paymentType) return;
@@ -40,7 +37,7 @@ export default function Step3Summary({ selectedIds, brief, onBack }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...brief,
-          services: selectedIds,
+          packageId,
           paymentType,
         }),
       });
@@ -63,50 +60,35 @@ export default function Step3Summary({ selectedIds, brief, onBack }: Props) {
           Podsumowanie zamówienia
         </h1>
         <p className="mt-2 text-sm text-neutral-400">
-          Sprawdź szczegóły i wybierz formę płatności.
+          Sprawdź pakiet i wybierz formę płatności.
         </p>
       </header>
 
-      <section className="rounded-xl border border-neutral-800 bg-neutral-900/40">
-        <header className="border-b border-neutral-800 px-5 py-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-neutral-400">
-            Wybrane usługi
-          </h2>
-        </header>
-        <ul className="divide-y divide-neutral-800">
-          {items.map((s) => (
-            <li
-              key={s.id}
-              className="flex items-center justify-between gap-3 px-5 py-3 text-sm"
-            >
-              <span className="text-neutral-100">
-                {s.name}
-                {s.recurring && (
-                  <span className="ml-2 text-xs text-neutral-500">/mies.</span>
-                )}
-              </span>
-              <span className="font-mono text-neutral-200">
-                {formatPLN(s.price)}
-              </span>
+      <section className="rounded-xl border border-neutral-800 bg-neutral-900/40 p-5">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <div>
+            <p className="font-mono text-xs uppercase tracking-widest text-emerald-400">
+              Pakiet {pkg.name}
+            </p>
+            <p className="mt-1 text-xs text-neutral-500">
+              Czas realizacji: {pkg.weeksLabel}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="font-mono text-2xl font-semibold">
+              {formatPLN(pkg.price)}
+            </p>
+            <p className="text-xs text-neutral-500">netto</p>
+          </div>
+        </div>
+        <ul className="mt-4 space-y-2">
+          {pkg.features.map((f) => (
+            <li key={f} className="flex items-start gap-2 text-sm text-neutral-200">
+              <span className="mt-0.5 shrink-0 font-semibold text-emerald-500">✓</span>
+              <span>{f}</span>
             </li>
           ))}
         </ul>
-        <footer className="space-y-1 border-t border-neutral-800 px-5 py-3 text-sm">
-          <div className="flex justify-between">
-            <span className="text-neutral-400">Jednorazowo</span>
-            <span className="font-mono font-semibold">
-              {formatPLN(totals.oneTime)}
-            </span>
-          </div>
-          {totals.monthly > 0 && (
-            <div className="flex justify-between">
-              <span className="text-neutral-400">Miesięcznie</span>
-              <span className="font-mono font-semibold text-emerald-400">
-                {formatPLN(totals.monthly)}
-              </span>
-            </div>
-          )}
-        </footer>
       </section>
 
       <section>
@@ -121,7 +103,6 @@ export default function Step3Summary({ selectedIds, brief, onBack }: Props) {
             description="Rezerwujesz termin, resztę płacisz po akceptacji projektu."
             amountLabel="Teraz zapłacisz"
             amount={formatPLN(depositPrice)}
-            disabled={totals.oneTime === 0}
           />
           <PaymentCard
             active={paymentType === "full"}
@@ -131,15 +112,8 @@ export default function Step3Summary({ selectedIds, brief, onBack }: Props) {
             amountLabel="Teraz zapłacisz"
             amount={formatPLN(fullPrice)}
             badge="Najlepsza cena"
-            disabled={totals.oneTime === 0}
           />
         </div>
-        {totals.oneTime === 0 && (
-          <p className="mt-3 text-xs text-neutral-500">
-            Twoje zamówienie składa się tylko z usług miesięcznych – płatność za
-            pierwszy miesiąc ustalimy w wiadomości.
-          </p>
-        )}
       </section>
 
       {error && (
@@ -163,7 +137,11 @@ export default function Step3Summary({ selectedIds, brief, onBack }: Props) {
           disabled={!paymentType || submitting}
           className="rounded-md bg-emerald-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
         >
-          {submitting ? "Wysyłanie..." : "Złóż zamówienie"}
+          {submitting
+            ? "Wysyłanie..."
+            : paymentType
+            ? `Zapłać ${formatPLN(amountDue)} →`
+            : "Wybierz formę płatności"}
         </button>
       </div>
 
@@ -190,7 +168,6 @@ function PaymentCard({
   amountLabel,
   amount,
   badge,
-  disabled,
 }: {
   active: boolean;
   onClick: () => void;
@@ -199,18 +176,14 @@ function PaymentCard({
   amountLabel: string;
   amount: string;
   badge?: string;
-  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      disabled={disabled}
       className={[
         "relative flex flex-col gap-3 rounded-lg border p-5 text-left transition",
-        disabled
-          ? "cursor-not-allowed border-neutral-800 bg-neutral-900/30 opacity-50"
-          : active
+        active
           ? "border-emerald-600 bg-emerald-600/5"
           : "border-neutral-800 bg-neutral-900/40 hover:border-neutral-700",
       ].join(" ")}
